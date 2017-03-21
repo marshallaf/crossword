@@ -3,8 +3,11 @@ import './styles.scss';
 
 export default class App extends React.Component {
   render() {
+    let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXY'.split('');
     return (
-      <div><Cell solution='A'/><Cell solution='B'/></div>
+      <div>
+        {letters.map((letter, index) => <Cell key={index} solution={letter}/>)}
+      </div>
     )
   }
 }
@@ -34,11 +37,20 @@ class Cell extends React.Component {
   }
 
   handleChange(e) {
+    let input = '';
+    let correct = false;
     if (e.target.value.length == 2) {
-      this.setState({input: e.target.value.slice(1)})
+      input = e.target.value.slice(1).toUpperCase();
     } else {
-      this.setState({input: e.target.value});
-    }    
+      input = e.target.value.toUpperCase();
+    }
+    if (input == this.solution) {
+      correct = true;
+    }
+    this.setState({
+      input: input,
+      correct: correct,
+    });
   }
 
   render() {
