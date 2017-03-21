@@ -9,12 +9,26 @@ body {
   height: 50px;
   border: 1px solid black;
   background: white;
+  position: relative;
+  font-size: 2em;
+  font-family: sans-serif;
+  justify-content: center;
+  display: flex;
+  align-items: center;
 
   &.incorrect {
     color: red;
   }
 
   &.active {
-    background: #f8f9bb;
+    background: #ffcd19;
+  }
+
+  input {
+    position: absolute;
+    color: transparent;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
   }
 }

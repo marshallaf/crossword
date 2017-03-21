@@ -13,18 +13,32 @@ class Cell extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      input: null,
+      input: '',
       correct: false,
       active: false,
     };
-    console.log(this.props);
     this.solution = this.props.solution;
 
     this.toggleActive = this.toggleActive.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   toggleActive() {
     this.setState({active: !this.state.active});
+  }
+
+  handleKeyPress(e) {
+    e.preventDefault();
+    console.log(e);
+  }
+
+  handleChange(e) {
+    if (e.target.value.length == 2) {
+      this.setState({input: e.target.value.slice(1)})
+    } else {
+      this.setState({input: e.target.value});
+    }    
   }
 
   render() {
@@ -32,7 +46,8 @@ class Cell extends React.Component {
     return (
       <div 
         className={classList}
-        onClick={this.toggleActive}>
+        onClick={this.toggleActive}>{this.state.input}
+        <input value={this.state.input} onChange={this.handleChange} />
       </div>
     );
   }
