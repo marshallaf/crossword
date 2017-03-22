@@ -15,6 +15,12 @@ export default class App extends React.Component {
     this.refDict = {};
 
     this.setActive = this.setActive.bind(this);
+
+    let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXY'.split('');
+    this.boardArr = [];
+    for (let i = 0; i < letters.length; i += 5) {
+      this.boardArr.push(letters.slice(i, i+5));
+    }
   }
 
   setActive(index) {
@@ -27,20 +33,25 @@ export default class App extends React.Component {
   }
 
   render() {
-    let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXY'.split('');
     return (
       <div className='board'>
-        {letters.map((letter, index) => {
+        {this.boardArr.map((row, rowIndex) => {
           return (
-            <Cell 
-              key={index} 
-              solution={letter}
-              index={index}
-              activeIndex={this.state.activeIndex}
-              setActive={this.setActive}
-              ref={cellObj => this.refDict[index] = cellObj}/>
-            )
-      })}
+            <div className='row' key={rowIndex}>
+              {row.map((letter, index) => {
+                const i = index + row.length * rowIndex;
+                return (
+                  <Cell 
+                    key={i} 
+                    solution={letter}
+                    index={i}
+                    activeIndex={this.state.activeIndex}
+                    setActive={this.setActive}
+                    ref={cellObj => this.refDict[i] = cellObj}/>
+                  )
+              })}
+            </div>
+          )})}
       </div>
     )
   }

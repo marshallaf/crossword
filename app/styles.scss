@@ -36,4 +36,9 @@ body {
 
 .board {
   display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
 }
