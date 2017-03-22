@@ -16,6 +16,7 @@ export default class App extends React.Component {
 
     this.setActive = this.setActive.bind(this);
 
+    // this is for testing
     let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXY'.split('');
     this.boardArr = [];
     for (let i = 0; i < letters.length; i += 5) {
@@ -69,6 +70,7 @@ class Cell extends React.Component {
 
     this.toggleActive = this.toggleActive.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
   }
 
   toggleActive() {
@@ -90,7 +92,20 @@ class Cell extends React.Component {
       input: input,
       correct: correct,
     });
-    this.props.setActive(this.props.index+1);
+    if (input.length == 1) {
+      this.props.setActive(this.props.index+1);
+    }
+  }
+
+  handleKeyPress(e) {
+    if (e.keyCode == 9) {
+      // tab pressed
+      e.preventDefault();
+      this.props.setActive(this.props.index+1);
+    } else if (e.keyCode == 8) {
+      // backspace pressed
+      this.props.setActive(this.props.index-1);
+    }
   }
 
   render() {
@@ -102,7 +117,8 @@ class Cell extends React.Component {
         onClick={this.toggleActive}>{this.state.input}
         <input 
           value={this.state.input} 
-          onChange={this.handleChange} 
+          onChange={this.handleChange}
+          onKeyDown={this.handleKeyPress}
           ref={input => this.textInput = input}/>
       </div>
     );
