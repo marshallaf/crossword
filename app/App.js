@@ -17,7 +17,7 @@ export default class App extends React.Component {
     this.setActive = this.setActive.bind(this);
 
     // this is for testing
-    let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXY'.split('');
+    let letters = 'ABCDEF0HIJKLMNOPQRSTUVWXY'.split('');
     this.boardArr = [];
     for (let i = 0; i < letters.length; i += 5) {
       this.boardArr.push(letters.slice(i, i+5));
@@ -41,6 +41,9 @@ export default class App extends React.Component {
             <div className='row' key={rowIndex}>
               {row.map((letter, index) => {
                 const i = index + row.length * rowIndex;
+                if (letter == 0) {
+                  return <div className='block' key={i}></div>
+                } else {
                 return (
                   <Cell 
                     key={i} 
@@ -50,6 +53,7 @@ export default class App extends React.Component {
                     setActive={this.setActive}
                     ref={cellObj => this.refDict[i] = cellObj}/>
                   )
+              }
               })}
             </div>
           )})}
@@ -124,3 +128,5 @@ class Cell extends React.Component {
     );
   }
 }
+
+
