@@ -7,7 +7,12 @@ export default class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      activeIndex: -1,
+      activeX: 2,
+      activeY: 0,
+      activeXstart: 2,
+      activeXend: 4,
+      activeYstart: 0,
+      activeYend: 0,
     }
     this.dims = {
       height: 5,
@@ -15,39 +20,61 @@ export default class App extends React.Component {
     };
     this.refDict = {};
 
-    this.setActive = this.setActive.bind(this);
-
     this.boardArr = crossword.board;
+
+    this.setActive = this.setActive.bind(this);
+    this.getIndex = this.getIndex.bind(this);
+    this.moveForward = this.moveForward.bind(this);
   }
 
-  setActive(index) {
-    if (index == this.state.activeIndex) {
-      this.setState({activeIndex: -1});
-    } else {
-      this.setState({activeIndex: index});
-    }
-    this.refDict[index].textInput.focus();
+  setActive(x, y) {
+    this.setState({activeX: x, activeY: y});
+    this.refDict[this.getIndex(x, y)].textInput.focus();
+  }
+
+  moveForward(x, y) {
+    do {
+      x++;
+      if (x == this.dims.width) {
+        x = 0;
+        y++;
+        if (y == this.dims.height) y = 0;
+      }
+    } while (this.boardArr[y][x] == 0);
+    this.setActive(x, y);
+  }
+
+  getIndex(x, y) {
+    return y * this.dims.width + x;
   }
 
   render() {
     return (
       <div className='board'>
-        {this.boardArr.map((row, rowIndex) => {
+        {this.boardArr.map((row, y) => {
           return (
-            <div className='row' key={rowIndex}>
-              {row.map((letter, index) => {
-                const i = index + row.length * rowIndex;
+            <div className='row' key={y}>
+              {row.map((letter, x) => {
+                const index = this.getIndex(x, y);
                 if (letter == 0) {
-                  return <div className='block' key={i}></div>
+                  return <div className='block' key={index}></div>
                 } else {
                 return (
                   <Cell 
-                    key={i} 
+                    key={index} 
                     solution={letter}
-                    index={i}
-                    activeIndex={this.state.activeIndex}
+                    index={index}
+                    x={x}
+                    y={y}
+                    activeXstart={this.state.activeXstart}
+                    activeXend={this.state.activeXend}
+                    activeYstart={this.state.activeYstart}
+                    activeYend={this.state.activeYend}
+                    activeX={this.state.activeX}
+                    activeY={this.state.activeY}
                     setActive={this.setActive}
-                    ref={cellObj => this.refDict[i] = cellObj}/>
+                    moveForward={this.moveForward}
+                    ref={cellObj => this.refDict[index] = cellObj}/>
                   )
               }
               })}
@@ -74,7 +101,7 @@ class Cell extends React.Component {
   }
 
   toggleActive() {
-    this.props.setActive(this.props.index);
+    this.props.setActive(this.props.x, this.props.y);
   }
 
   handleChange(e) {
@@ -93,7 +120,7 @@ class Cell extends React.Component {
       correct: correct,
     });
     if (input.length == 1) {
-      this.props.setActive(this.props.index+1);
+      this.props.moveForward(this.props.x, this.props.y);
     }
   }
 
@@ -109,8 +136,12 @@ class Cell extends React.Component {
   }
 
   render() {
-    let isActive = this.props.activeIndex == this.props.index;
-    let classList = `cell ${this.state.correct ? 'correct' : 'incorrect'} ${isActive ? 'active' : ''}`;
+    let isActive = this.props.x == this.props.activeX && this.props.y == this.props.activeY;
+    const isWordActive = this.props.x >= this.props.activeXstart && 
+                         this.props.x <= this.props.activeXend &&
+                         this.props.y >= this.props.activeYstart &&
+                         this.props.y <= this.props.activeYend;
+    let classList = `cell ${this.state.correct ? 'correct' : 'incorrect'} ${isActive ? 'active' : ''} ${isWordActive ? 'word-active' : ''}`;
     return (
       <div 
         className={classList}

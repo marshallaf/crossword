@@ -20,6 +20,10 @@ body {
     color: red;
   }
 
+  &.word-active {
+    background: #99c0ff;
+  }
+
   &.active {
     background: #ffcd19;
   }
