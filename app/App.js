@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './styles.scss';
+import {crossword} from '../crosswords/testcrossword2';
 
 export default class App extends React.Component {
   constructor() {
@@ -16,12 +17,7 @@ export default class App extends React.Component {
 
     this.setActive = this.setActive.bind(this);
 
-    // this is for testing
-    let letters = 'ABCDEF0HIJKLMNOPQRSTUVWXY'.split('');
-    this.boardArr = [];
-    for (let i = 0; i < letters.length; i += 5) {
-      this.boardArr.push(letters.slice(i, i+5));
-    }
+    this.boardArr = crossword.board;
   }
 
   setActive(index) {
