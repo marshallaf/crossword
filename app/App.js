@@ -50,7 +50,6 @@ export default class App extends React.Component {
         activeYend: word.yEnd,
         activeWord: word,
       });
-    this.refDict[this.getIndex(x, y)].textInput.focus();
   }
 
   moveForward(x, y) {
@@ -147,6 +146,7 @@ class Cell extends React.Component {
   }
 
   writeLetter(letter) {
+    letter = letter.toUpperCase();
     let correct = false;
     if (letter == this.solution) {
       correct = true;
@@ -182,6 +182,9 @@ class Cell extends React.Component {
     } else if(e.keyCode == 32) {
       // spacebar pressed
       this.props.changeDirection();
+    } else if (e.keyCode >= 65 && e.keyCode <= 90) {
+      this.writeLetter(e.key);
+      this.props.moveForward(this.props.x, this.props.y);
     }
   }
 
@@ -194,13 +197,11 @@ class Cell extends React.Component {
     let classList = `cell ${this.state.correct ? 'correct' : 'incorrect'} ${isActive ? 'active' : ''} ${isWordActive ? 'word-active' : ''}`;
     return (
       <div 
+        tabIndex='0'
         className={classList}
-        onClick={this.toggleActive}>{this.state.input}
-        <input 
-          value={this.state.input} 
-          onChange={this.handleChange}
-          onKeyDown={this.handleKeyPress}
-          ref={input => this.textInput = input}/>
+        onClick={this.toggleActive}
+        onKeyDown={this.handleKeyPress}>
+        {this.state.input}        
       </div>
     );
   }
