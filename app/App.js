@@ -33,6 +33,8 @@ export default class App extends React.Component {
     this.moveForward = this.moveForward.bind(this);
     this.moveBackward = this.moveBackward.bind(this);
     this.changeDirection = this.changeDirection.bind(this);
+    this.moveWordForward = this.moveWordForward.bind(this);
+    this.moveWordBackward = this.moveWordBackward.bind(this);
   }
 
   setActive(x, y) {
@@ -85,14 +87,32 @@ export default class App extends React.Component {
 
   moveWordForward(x, y) {
     // get the current word
-
-    // get the next word
+    let wordNo, word;
+    if (this.across) {
+      wordNo = this.boardArr[y][x].across;
+      word = this.crossword.words.across[wordNo+1];
+    } else {
+      wordNo = this.boardArr[y][x].down;
+      word = this.crossword.words.down[wordNo+1];
+    }
 
     // set the active cell to xStart and yStart
+    this.setActive(word.xStart, word.yStart);
   }
 
   moveWordBackward(x, y) {
+    // get the current word
+    let wordNo, word;
+    if (this.across) {
+      wordNo = this.boardArr[y][x].across;
+      word = this.crossword.words.across[wordNo-1];
+    } else {
+      wordNo = this.boardArr[y][x].down;
+      word = this.crossword.words.down[wordNo-1];
+    }
 
+    // set the active cell to xStart and yStart
+    this.setActive(word.xStart, word.yStart);
   }
 
   changeDirection() {
@@ -131,6 +151,8 @@ export default class App extends React.Component {
                     setActive={this.setActive}
                     moveForward={this.moveForward}
                     moveBackward={this.moveBackward}
+                    moveWordForward={this.moveWordForward}
+                    moveWordBackward={this.moveWordBackward}
                     changeDirection={this.changeDirection}
                     ref={cellObj => this.refDict[index] = cellObj}/>
                   )
@@ -188,10 +210,15 @@ class Cell extends React.Component {
   }
 
   handleKeyPress(e) {
+    console.log(e);
     if (e.keyCode == 9) {
       // tab pressed
       e.preventDefault();
-      this.props.setActive(this.props.index+1);
+      if (!e.shiftKey) {
+        this.props.moveWordForward(this.props.x, this.props.y);
+      } else {
+        this.props.moveWordBackward(this.props.x, this.props.y);
+      }
     } else if (e.keyCode == 8) {
       // backspace pressed
       if (this.state.input.length == 0)
