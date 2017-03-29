@@ -190,8 +190,8 @@ export const crossword = {
       },
       3: {
         clue: 'Tiny, informally',
-        xStart: 3,
-        xEnd: 3,
+        xStart: 4,
+        xEnd: 4,
         yStart: 0,
         yEnd: 3,
       },
