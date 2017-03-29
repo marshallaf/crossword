@@ -6,24 +6,27 @@ import {crossword} from '../crosswords/testcrossword2';
 export default class App extends React.Component {
   constructor() {
     super();
-    this.state = {
-      activeX: 2,
-      activeY: 0,
-      activeXstart: 2,
-      activeXend: 4,
-      activeYstart: 0,
-      activeYend: 0,
-      activeWord: null,
-    }
     this.dims = {
       height: 5,
       width: 5,
     };
     this.refDict = {};
     this.across = true;
+    this.wordIndex = 0;
 
     this.crossword = crossword;
     this.boardArr = crossword.boardExt;
+    const word = this.crossword.words.across[0];
+
+    this.state = {
+      activeX: word.xStart,
+      activeY: word.yStart,
+      activeXstart: word.xStart,
+      activeXend: word.xEnd,
+      activeYstart: word.yStart,
+      activeYend: word.yEnd,
+      activeWord: word,
+    }
 
     this.setActive = this.setActive.bind(this);
     this.getIndex = this.getIndex.bind(this);
@@ -53,6 +56,7 @@ export default class App extends React.Component {
     this.refDict[this.getIndex(x,y)].square.focus();
   }
 
+  // move a single cell forward, in the current direction
   moveForward(x, y) {
     do {
       x++;
@@ -65,6 +69,7 @@ export default class App extends React.Component {
     this.setActive(x, y);
   }
 
+  // move a single cell backward, in the current direction
   moveBackward(x, y) {
     do {
       x--;
@@ -76,6 +81,18 @@ export default class App extends React.Component {
     } while (!this.boardArr[y][x].letter);
     this.setActive(x, y);
     this.refDict[this.getIndex(x, y)].writeLetter('');
+  }
+
+  moveWordForward(x, y) {
+    // get the current word
+
+    // get the next word
+
+    // set the active cell to xStart and yStart
+  }
+
+  moveWordBackward(x, y) {
+
   }
 
   changeDirection() {
