@@ -50,6 +50,7 @@ export default class App extends React.Component {
         activeYend: word.yEnd,
         activeWord: word,
       });
+    this.refDict[this.getIndex(x,y)].square.focus();
   }
 
   moveForward(x, y) {
@@ -200,7 +201,8 @@ class Cell extends React.Component {
         tabIndex='0'
         className={classList}
         onClick={this.toggleActive}
-        onKeyDown={this.handleKeyPress}>
+        onKeyDown={this.handleKeyPress}
+        ref={square => this.square = square}>
         {this.state.input}        
       </div>
     );
