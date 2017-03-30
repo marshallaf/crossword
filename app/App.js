@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import axios from 'axios';
 import './styles.scss';
+import {convertCrossword} from './convertCrossword';
 import {crossword} from '../crosswords/testcrossword2';
 
 export default class App extends React.Component {
@@ -28,6 +30,8 @@ export default class App extends React.Component {
       activeWord: word,
     }
 
+
+    this.setup = this.setup.bind(this);
     this.setActive = this.setActive.bind(this);
     this.getIndex = this.getIndex.bind(this);
     this.moveForward = this.moveForward.bind(this);
@@ -36,6 +40,43 @@ export default class App extends React.Component {
     this.moveWordForward = this.moveWordForward.bind(this);
     this.moveWordBackward = this.moveWordBackward.bind(this);
     this.handleArrows = this.handleArrows.bind(this);
+  }
+
+  componentDidMount() {
+    const fr = new FileReader();
+    fetch('./testcrossword.xml')
+      .then(res => res.text())
+      .then(astext => {
+        console.log(astext);
+        return convertCrossword(astext)
+      })
+      .then(converted => {
+        this.setup(converted);
+      },
+      error => {console.error('problem reading crossword', error)});
+  }
+
+  setup(newCrossword) {
+    this.dims = {
+      height: newCrossword.board.length,
+      width: newCrossword.board[0].length,
+    }
+    this.crossword = newCrossword;
+    this.boardArr = newCrossword.board;
+    this.refDict = {};
+    this.across = true;
+
+    const word = this.crossword.words.across[0];
+
+    this.setState({
+      activeX: word.xStart,
+      activeY: word.yStart,
+      activeXstart: word.xStart,
+      activeXend: word.xEnd,
+      activeYstart: word.yStart,
+      activeYend: word.yEnd,
+      activeWord: word,
+    });
   }
 
   setActive(x, y) {

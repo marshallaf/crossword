@@ -3,6 +3,6 @@ const ReactDOM = require('react-dom');
 import App from './App';
 
 ReactDOM.render(
-  <App>Hello world!</App>,
+  <App></App>,
   document.getElementById('app')
 );
