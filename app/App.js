@@ -15,7 +15,7 @@ export default class App extends React.Component {
     this.wordIndex = 0;
 
     this.crossword = crossword;
-    this.boardArr = crossword.boardExt;
+    this.boardArr = crossword.board;
     const word = this.crossword.words.across[0];
 
     this.state = {
