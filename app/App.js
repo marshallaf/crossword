@@ -8,28 +8,21 @@ import {crossword} from '../crosswords/testcrossword2';
 export default class App extends React.Component {
   constructor() {
     super();
-    this.dims = {
-      height: 5,
-      width: 5,
-    };
+    this.dims = {};
     this.refDict = {};
-    this.across = true;
-    this.wordIndex = 0;
 
-    this.crossword = crossword;
-    this.boardArr = crossword.board;
-    const word = this.crossword.words.across[0];
+    this.crossword = {};
+    this.boardArr = [];
 
     this.state = {
-      activeX: word.xStart,
-      activeY: word.yStart,
-      activeXstart: word.xStart,
-      activeXend: word.xEnd,
-      activeYstart: word.yStart,
-      activeYend: word.yEnd,
-      activeWord: word,
+      activeX: null,
+      activeY: null,
+      activeXstart: null,
+      activeXend: null,
+      activeYstart: null,
+      activeYend: null,
+      activeWord: null,
     }
-
 
     this.setup = this.setup.bind(this);
     this.setActive = this.setActive.bind(this);
@@ -43,13 +36,9 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    const fr = new FileReader();
     fetch('./testcrossword.xml')
       .then(res => res.text())
-      .then(astext => {
-        console.log(astext);
-        return convertCrossword(astext)
-      })
+      .then(astext => convertCrossword(astext))
       .then(converted => {
         this.setup(converted);
       },

@@ -8,6 +8,7 @@ export function convertCrossword(crosswordXml) {
         reject(Error(err));
       }
       const crossword = result['crossword-compiler']['rectangular-puzzle'].crossword;
+
       const board = new Array(parseInt(crossword.grid.height));
       const cells = crossword.grid.cell;
       cells.forEach(cell => {
@@ -50,6 +51,13 @@ export function convertCrossword(crosswordXml) {
           outWord.yStart = parseInt(y[0]) - 1;
           outWord.yEnd = parseInt(y[1]) - 1;
         }
+      });
+
+      board.forEach((row, y) => {
+        row.forEach((cell, x) => {
+          cell.across = words.across.findIndex(word => (y == word.yStart && x >= word.xStart && x <= word.xEnd));
+          cell.down = words.down.findIndex(word => (x == word.xStart && y >= word.yStart && y <= word.yEnd));
+        });
       });
 
       resolve({ board: board, words: words });
