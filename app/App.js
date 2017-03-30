@@ -61,11 +61,20 @@ export default class App extends React.Component {
   // move a single cell forward, in the current direction
   moveForward(x, y) {
     do {
-      x++;
-      if (x == this.dims.width) {
-        x = 0;
+      if (this.across) {
+        x++;
+        if (x == this.dims.width) {
+          x = 0;
+          y++;
+          if (y == this.dims.height) y = 0;
+        }
+      } else {
         y++;
-        if (y == this.dims.height) y = 0;
+        if (y == this.dims.height) {
+          y = 0;
+          x++;
+          if (x == this.dims.width) x = 0;
+        }
       }
     } while (!this.boardArr[y][x].letter);
     this.setActive(x, y);
@@ -74,11 +83,20 @@ export default class App extends React.Component {
   // move a single cell backward, in the current direction
   moveBackward(x, y) {
     do {
-      x--;
-      if (x < 0) {
-        x = this.dims.width-1;
+      if (this.across) {
+        x--;
+        if (x < 0) {
+          x = this.dims.width-1;
+          y--;
+          if (y < 0) y = this.dims.height-1;
+        }
+      } else {
         y--;
-        if (y < 0) y = this.dims.height-1;
+        if (y < 0) {
+          y = this.dims.height-1;
+          x--;
+          if (x < 0) x = this.dims.width-1;
+        }
       }
     } while (!this.boardArr[y][x].letter);
     this.setActive(x, y);
@@ -87,13 +105,23 @@ export default class App extends React.Component {
 
   moveWordForward(x, y) {
     // get the current word
-    let wordNo, word;
+    let word;
     if (this.across) {
-      wordNo = this.boardArr[y][x].across;
-      word = this.crossword.words.across[wordNo+1];
+      let wordNo = this.boardArr[y][x].across + 1;
+      if (this.crossword.words.across.length == wordNo) {
+        word = this.crossword.words.down[0];
+        this.across = false;
+      } else {
+        word = this.crossword.words.across[wordNo];
+      }
     } else {
-      wordNo = this.boardArr[y][x].down;
-      word = this.crossword.words.down[wordNo+1];
+      let wordNo = this.boardArr[y][x].down + 1;
+      if (this.crossword.words.down.length == wordNo) {
+        word = this.crossword.words.across[0];
+        this.across = true;
+      } else {
+        word = this.crossword.words.down[wordNo];
+      }
     }
 
     // set the active cell to xStart and yStart
@@ -210,7 +238,7 @@ class Cell extends React.Component {
   }
 
   handleKeyPress(e) {
-    console.log(e);
+    console.log(e.keyCode);
     if (e.keyCode == 9) {
       // tab pressed
       e.preventDefault();
@@ -229,7 +257,9 @@ class Cell extends React.Component {
       this.props.changeDirection();
     } else if (e.keyCode >= 65 && e.keyCode <= 90) {
       this.writeLetter(e.key);
-      this.props.moveForward(this.props.x, this.props.y);
+      // only move cell forward if not at the end of a word
+      if (!(this.props.x == this.props.activeXend && this.props.y == this.props.activeYend))
+        this.props.moveForward(this.props.x, this.props.y);
     }
   }
 
