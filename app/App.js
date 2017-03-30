@@ -35,6 +35,7 @@ export default class App extends React.Component {
     this.changeDirection = this.changeDirection.bind(this);
     this.moveWordForward = this.moveWordForward.bind(this);
     this.moveWordBackward = this.moveWordBackward.bind(this);
+    this.handleArrows = this.handleArrows.bind(this);
   }
 
   setActive(x, y) {
@@ -143,6 +144,30 @@ export default class App extends React.Component {
     this.setActive(word.xStart, word.yStart);
   }
 
+  handleArrows(keyCode) {
+    let x = this.state.activeX;
+    let y = this.state.activeY;
+    if (keyCode == 38 || keyCode == 40) {
+      // up + down
+      if (this.across) {
+        this.across = false;
+        this.setActive(x, y);
+      } else {
+        if (keyCode == 38) this.moveBackward(x, y);
+        else this.moveForward(x, y);
+      }
+    } else {
+      // left + right
+      if (!this.across) {
+        this.across = true;
+        this.setActive(x, y);
+      } else {
+        if (keyCode == 37) this.moveBackward(x, y);
+        else this.moveForward(x, y);
+      }
+    }
+  }
+
   changeDirection() {
     this.across = !this.across;
     this.setActive(this.state.activeX, this.state.activeY);
@@ -182,6 +207,7 @@ export default class App extends React.Component {
                     moveWordForward={this.moveWordForward}
                     moveWordBackward={this.moveWordBackward}
                     changeDirection={this.changeDirection}
+                    handleArrows={this.handleArrows}
                     ref={cellObj => this.refDict[index] = cellObj}/>
                   )
               }
@@ -255,6 +281,9 @@ class Cell extends React.Component {
     } else if(e.keyCode == 32) {
       // spacebar pressed
       this.props.changeDirection();
+    } else if (e.keyCode >= 37 && e.keyCode <= 40) {
+      // arrow keys pressed
+      this.props.handleArrows(e.keyCode);
     } else if (e.keyCode >= 65 && e.keyCode <= 90) {
       this.writeLetter(e.key);
       // only move cell forward if not at the end of a word
