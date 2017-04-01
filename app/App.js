@@ -167,7 +167,7 @@ class Board extends React.Component {
           if (x < 0) x = this.props.dims.width-1;
         }
       }
-    } while (!this.boardArr[y][x].letter);
+    } while (!this.props.crossword.board[y][x].letter);
     this.setActive(x, y);
     this.refDict[this.getIndex(x, y)].writeLetter('');
   }
