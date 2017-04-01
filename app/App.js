@@ -8,31 +8,22 @@ import {crossword} from '../crosswords/testcrossword2';
 export default class App extends React.Component {
   constructor() {
     super();
-    this.dims = {};
-    this.refDict = {};
 
-    this.crossword = {};
-    this.boardArr = [];
+    let crossword = {
+      board: [],
+    };
+
+    this.dims = {
+      height: 0,
+      width: 0,
+    };
 
     this.state = {
-      activeX: null,
-      activeY: null,
-      activeXstart: null,
-      activeXend: null,
-      activeYstart: null,
-      activeYend: null,
       activeWord: null,
-    }
+      crossword: crossword,
+    };
 
     this.setup = this.setup.bind(this);
-    this.setActive = this.setActive.bind(this);
-    this.getIndex = this.getIndex.bind(this);
-    this.moveForward = this.moveForward.bind(this);
-    this.moveBackward = this.moveBackward.bind(this);
-    this.changeDirection = this.changeDirection.bind(this);
-    this.moveWordForward = this.moveWordForward.bind(this);
-    this.moveWordBackward = this.moveWordBackward.bind(this);
-    this.handleArrows = this.handleArrows.bind(this);
   }
 
   componentDidMount() {
@@ -45,28 +36,66 @@ export default class App extends React.Component {
       error => {console.error('problem reading crossword', error)});
   }
 
+
   setup(newCrossword) {
+    this.setState({
+      crossword: newCrossword,
+      activeWord: newCrossword.words.across[0],
+    });
+
     this.dims = {
       height: newCrossword.board.length,
       width: newCrossword.board[0].length,
-    }
-    this.crossword = newCrossword;
-    this.boardArr = newCrossword.board;
-    this.refDict = {};
-    this.across = true;
-
-    const word = this.crossword.words.across[0];
-
-    this.setState({
-      activeX: word.xStart,
-      activeY: word.yStart,
-      activeXstart: word.xStart,
-      activeXend: word.xEnd,
-      activeYstart: word.yStart,
-      activeYend: word.yEnd,
-      activeWord: word,
-    });
+    };
+    this.forceUpdate();
   }
+
+  render() {
+    return (
+      <div className="container">
+        <Board 
+          crossword={this.state.crossword}
+          dims={this.dims}
+          activeWord={this.state.activeWord}/>
+        <Clues words={this.state.crossword.words} />
+      </div>
+    );
+  }
+}
+
+class Clues extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className="wordsList">
+      </div>
+    );
+  }
+}
+
+class Board extends React.Component {
+  constructor(props) {
+    super(props);
+    this.refDict = {};
+
+    this.state = {
+      activeX: 0,
+      activeY: 0,
+    };
+
+    this.setActive = this.setActive.bind(this);
+    this.getIndex = this.getIndex.bind(this);
+    this.moveForward = this.moveForward.bind(this);
+    this.moveBackward = this.moveBackward.bind(this);
+    this.changeDirection = this.changeDirection.bind(this);
+    this.moveWordForward = this.moveWordForward.bind(this);
+    this.moveWordBackward = this.moveWordBackward.bind(this);
+    this.handleArrows = this.handleArrows.bind(this);
+  }
+
 
   setActive(x, y) {
     let wordNo, word;
@@ -80,11 +109,6 @@ export default class App extends React.Component {
     this.setState({
         activeX: x, 
         activeY: y,
-        activeXstart: word.xStart,
-        activeXend: word.xEnd,
-        activeYstart: word.yStart,
-        activeYend: word.yEnd,
-        activeWord: word,
       });
     this.refDict[this.getIndex(x,y)].square.focus();
   }
@@ -94,17 +118,17 @@ export default class App extends React.Component {
     do {
       if (this.across) {
         x++;
-        if (x == this.dims.width) {
+        if (x == this.props.dims.width) {
           x = 0;
           y++;
-          if (y == this.dims.height) y = 0;
+          if (y == this.props.dims.height) y = 0;
         }
       } else {
         y++;
-        if (y == this.dims.height) {
+        if (y == this.props.dims.height) {
           y = 0;
           x++;
-          if (x == this.dims.width) x = 0;
+          if (x == this.props.dims.width) x = 0;
         }
       }
     } while (!this.boardArr[y][x].letter);
@@ -117,16 +141,16 @@ export default class App extends React.Component {
       if (this.across) {
         x--;
         if (x < 0) {
-          x = this.dims.width-1;
+          x = this.props.dims.width-1;
           y--;
-          if (y < 0) y = this.dims.height-1;
+          if (y < 0) y = this.props.dims.height-1;
         }
       } else {
         y--;
         if (y < 0) {
-          y = this.dims.height-1;
+          y = this.props.dims.height-1;
           x--;
-          if (x < 0) x = this.dims.width-1;
+          if (x < 0) x = this.props.dims.width-1;
         }
       }
     } while (!this.boardArr[y][x].letter);
@@ -204,13 +228,13 @@ export default class App extends React.Component {
   }
 
   getIndex(x, y) {
-    return y * this.dims.width + x;
+    return y * this.props.dims.width + x;
   }
 
   render() {
     return (
       <div className='board'>
-        {this.boardArr.map((row, y) => {
+        {this.props.crossword.board.map((row, y) => {
           return (
             <div className='row' key={y}>
               {row.map((square, x) => {
@@ -225,10 +249,7 @@ export default class App extends React.Component {
                     index={index}
                     x={x}
                     y={y}
-                    activeXstart={this.state.activeXstart}
-                    activeXend={this.state.activeXend}
-                    activeYstart={this.state.activeYstart}
-                    activeYend={this.state.activeYend}
+                    activeWord={this.props.activeWord}
                     activeX={this.state.activeX}
                     activeY={this.state.activeY}
                     setActive={this.setActive}
@@ -324,10 +345,10 @@ class Cell extends React.Component {
 
   render() {
     let isActive = this.props.x == this.props.activeX && this.props.y == this.props.activeY;
-    const isWordActive = this.props.x >= this.props.activeXstart && 
-                         this.props.x <= this.props.activeXend &&
-                         this.props.y >= this.props.activeYstart &&
-                         this.props.y <= this.props.activeYend;
+    const isWordActive = this.props.x >= this.props.activeWord.xStart && 
+                         this.props.x <= this.props.activeWord.xEnd &&
+                         this.props.y >= this.props.activeWord.yStart &&
+                         this.props.y <= this.props.activeWord.yEnd;
     let classList = `cell ${this.state.correct ? 'correct' : 'incorrect'} ${isActive ? 'active' : ''} ${isWordActive ? 'word-active' : ''}`;
     return (
       <div 
