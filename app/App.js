@@ -23,7 +23,11 @@ export default class App extends React.Component {
       crossword: crossword,
     };
 
+    this.across = true;
+
     this.setup = this.setup.bind(this);
+    this.setActiveWord = this.setActiveWord.bind(this);
+    this.changeDirection = this.changeDirection.bind(this);
   }
 
   componentDidMount() {
@@ -38,16 +42,29 @@ export default class App extends React.Component {
 
 
   setup(newCrossword) {
-    this.setState({
-      crossword: newCrossword,
-      activeWord: newCrossword.words.across[0],
-    });
-
     this.dims = {
       height: newCrossword.board.length,
       width: newCrossword.board[0].length,
     };
-    this.forceUpdate();
+
+    this.across = true;
+
+    this.setState({
+      crossword: newCrossword,
+      activeWord: newCrossword.words.across[0],
+    });
+  }
+
+  setActiveWord(x, y) {
+    let direction = this.across ? 'across' : 'down';
+    let wordNo = this.state.crossword.board[y][x][direction];
+    let word = this.state.crossword.words[direction][wordNo];
+    this.setState({ activeWord: word });
+  }
+
+  changeDirection(x, y) {
+    this.across = !this.across;
+    this.setActiveWord(x, y);
   }
 
   render() {
@@ -56,7 +73,10 @@ export default class App extends React.Component {
         <Board 
           crossword={this.state.crossword}
           dims={this.dims}
-          activeWord={this.state.activeWord}/>
+          activeWord={this.state.activeWord}
+          setActiveWord={this.setActiveWord}
+          across={this.across}
+          changeDirection={this.changeDirection}/>
         <Clues words={this.state.crossword.words} />
       </div>
     );
@@ -90,7 +110,6 @@ class Board extends React.Component {
     this.getIndex = this.getIndex.bind(this);
     this.moveForward = this.moveForward.bind(this);
     this.moveBackward = this.moveBackward.bind(this);
-    this.changeDirection = this.changeDirection.bind(this);
     this.moveWordForward = this.moveWordForward.bind(this);
     this.moveWordBackward = this.moveWordBackward.bind(this);
     this.handleArrows = this.handleArrows.bind(this);
@@ -98,25 +117,20 @@ class Board extends React.Component {
 
 
   setActive(x, y) {
-    let wordNo, word;
-    if (this.across) {
-      wordNo = this.boardArr[y][x].across;
-      word = this.crossword.words.across[wordNo];
-    } else {
-      wordNo = this.boardArr[y][x].down;
-      word = this.crossword.words.down[wordNo];
-    }
+    console.log(x, y);
     this.setState({
-        activeX: x, 
-        activeY: y,
-      });
+      activeX: x, 
+      activeY: y,
+    });
+    this.props.setActiveWord(x, y);
     this.refDict[this.getIndex(x,y)].square.focus();
+    console.log(this.refDict[this.getIndex(x,y)]);
   }
 
   // move a single cell forward, in the current direction
   moveForward(x, y) {
     do {
-      if (this.across) {
+      if (this.props.across) {
         x++;
         if (x == this.props.dims.width) {
           x = 0;
@@ -131,14 +145,14 @@ class Board extends React.Component {
           if (x == this.props.dims.width) x = 0;
         }
       }
-    } while (!this.boardArr[y][x].letter);
+    } while (!this.props.crossword.board[y][x].letter);
     this.setActive(x, y);
   }
 
   // move a single cell backward, in the current direction
   moveBackward(x, y) {
     do {
-      if (this.across) {
+      if (this.props.across) {
         x--;
         if (x < 0) {
           x = this.props.dims.width-1;
@@ -222,11 +236,6 @@ class Board extends React.Component {
     }
   }
 
-  changeDirection() {
-    this.across = !this.across;
-    this.setActive(this.state.activeX, this.state.activeY);
-  }
-
   getIndex(x, y) {
     return y * this.props.dims.width + x;
   }
@@ -242,26 +251,26 @@ class Board extends React.Component {
                 if (!square.letter) {
                   return <div className='block' key={index}></div>
                 } else {
-                return (
-                  <Cell 
-                    key={index} 
-                    solution={square.letter}
-                    index={index}
-                    x={x}
-                    y={y}
-                    activeWord={this.props.activeWord}
-                    activeX={this.state.activeX}
-                    activeY={this.state.activeY}
-                    setActive={this.setActive}
-                    moveForward={this.moveForward}
-                    moveBackward={this.moveBackward}
-                    moveWordForward={this.moveWordForward}
-                    moveWordBackward={this.moveWordBackward}
-                    changeDirection={this.changeDirection}
-                    handleArrows={this.handleArrows}
-                    ref={cellObj => this.refDict[index] = cellObj}/>
+                  return (
+                    <Cell 
+                      key={index} 
+                      solution={square.letter}
+                      index={index}
+                      x={x}
+                      y={y}
+                      activeWord={this.props.activeWord}
+                      activeX={this.state.activeX}
+                      activeY={this.state.activeY}
+                      setActive={this.setActive}
+                      moveForward={this.moveForward}
+                      moveBackward={this.moveBackward}
+                      moveWordForward={this.moveWordForward}
+                      moveWordBackward={this.moveWordBackward}
+                      changeDirection={this.props.changeDirection}
+                      handleArrows={this.handleArrows}
+                      ref={cellObj => this.refDict[index] = cellObj}/>
                   )
-              }
+                }
               })}
             </div>
           )})}
@@ -331,7 +340,7 @@ class Cell extends React.Component {
       else this.writeLetter('');
     } else if(e.keyCode == 32) {
       // spacebar pressed
-      this.props.changeDirection();
+      this.props.changeDirection(this.props.x, this.props.y);
     } else if (e.keyCode >= 37 && e.keyCode <= 40) {
       // arrow keys pressed
       this.props.handleArrows(e.keyCode);
