@@ -11,6 +11,10 @@ export default class App extends React.Component {
 
     let crossword = {
       board: [],
+      words: {
+        across: [],
+        down: [],
+      },
     };
 
     this.dims = {
@@ -77,7 +81,9 @@ export default class App extends React.Component {
           setActiveWord={this.setActiveWord}
           across={this.across}
           changeDirection={this.changeDirection}/>
-        <Clues words={this.state.crossword.words} />
+        <Clues 
+          words={this.state.crossword.words}
+          activeWord={this.state.activeWord} />
       </div>
     );
   }
@@ -91,6 +97,34 @@ class Clues extends React.Component {
   render() {
     return (
       <div className="wordsList">
+        <div className="wordSet">
+          <h3>Across</h3>
+          {this.props.words.across.map(word => {
+            if (word == this.props.activeWord) {
+              return (
+                <p className="wordList-active"><b>{word.number}:</b> {word.clue}</p>
+              );
+            } else {
+              return (
+                <p><b>{word.number}:</b> {word.clue}</p>
+              );
+            }
+          })}
+        </div>
+        <div className="wordSet">
+          <h3>Down</h3>
+          {this.props.words.down.map(word => {
+            if (word == this.props.activeWord) {
+              return (
+                <p className="wordList-active"><b>{word.number}:</b> {word.clue}</p>
+              );
+            } else {
+              return (
+                <p><b>{word.number}:</b> {word.clue}</p>
+              );
+            }
+          })}
+        </div>
       </div>
     );
   }
@@ -117,14 +151,12 @@ class Board extends React.Component {
 
 
   setActive(x, y) {
-    console.log(x, y);
     this.setState({
       activeX: x, 
       activeY: y,
     });
     this.props.setActiveWord(x, y);
     this.refDict[this.getIndex(x,y)].square.focus();
-    console.log(this.refDict[this.getIndex(x,y)]);
   }
 
   // move a single cell forward, in the current direction
@@ -174,23 +206,15 @@ class Board extends React.Component {
 
   moveWordForward(x, y) {
     // get the current word
+    const direction = this.props.across ? 'across' : 'down';
+    const otherDir = this.props.across ? 'down' : 'across';
     let word;
-    if (this.across) {
-      let wordNo = this.boardArr[y][x].across + 1;
-      if (this.crossword.words.across.length == wordNo) {
-        word = this.crossword.words.down[0];
-        this.across = false;
-      } else {
-        word = this.crossword.words.across[wordNo];
-      }
+    let wordNo = this.props.crossword.board[y][x][direction] + 1;
+    if (this.props.crossword.words[direction].length == wordNo) {
+      word = this.props.crossword.words[otherDir][0];
+      this.props.changeDirection(word.xStart, word.yStart);
     } else {
-      let wordNo = this.boardArr[y][x].down + 1;
-      if (this.crossword.words.down.length == wordNo) {
-        word = this.crossword.words.across[0];
-        this.across = true;
-      } else {
-        word = this.crossword.words.down[wordNo];
-      }
+      word = this.props.crossword.words[direction][wordNo];
     }
 
     // set the active cell to xStart and yStart
@@ -199,13 +223,16 @@ class Board extends React.Component {
 
   moveWordBackward(x, y) {
     // get the current word
-    let wordNo, word;
-    if (this.across) {
-      wordNo = this.boardArr[y][x].across;
-      word = this.crossword.words.across[wordNo-1];
+    const direction = this.props.across ? 'across' : 'down';
+    const otherDir = this.props.across ? 'down' : 'across';
+    let word;
+    let wordNo = this.props.crossword.board[y][x][direction] - 1;
+    if (wordNo < 0) {
+      const lastIndex = this.props.crossword.words[otherDir].length - 1;
+      word = this.props.crossword.words[otherDir][lastIndex];
+      this.props.changeDirection(word.xStart, word.yStart);
     } else {
-      wordNo = this.boardArr[y][x].down;
-      word = this.crossword.words.down[wordNo-1];
+      word = this.props.crossword.words[direction][wordNo];
     }
 
     // set the active cell to xStart and yStart
@@ -217,8 +244,8 @@ class Board extends React.Component {
     let y = this.state.activeY;
     if (keyCode == 38 || keyCode == 40) {
       // up + down
-      if (this.across) {
-        this.across = false;
+      if (this.props.across) {
+        this.props.changeDirection(x, y);
         this.setActive(x, y);
       } else {
         if (keyCode == 38) this.moveBackward(x, y);
@@ -226,8 +253,8 @@ class Board extends React.Component {
       }
     } else {
       // left + right
-      if (!this.across) {
-        this.across = true;
+      if (!this.props.across) {
+        this.props.changeDirection(x, y);
         this.setActive(x, y);
       } else {
         if (keyCode == 37) this.moveBackward(x, y);
