@@ -76,8 +76,6 @@ export default class App extends React.Component {
     this.setActiveWord(x, y);
   }
 
-  //TODO: you have to change the properties of the word object in the crossword, since
-  // activeWord is not permanent. Better to just change activeWord to reflect the current word index.
   updateWord(letterStatus) {
     // update total board correctness
     const numCorrect = this.state.numCorrect + letterStatus;
@@ -88,10 +86,10 @@ export default class App extends React.Component {
     const activeWord = this.crossword.words[direction][this.state.activeWordIndex];
     if (this.across) {
       wordStatusArr = this.state.wordStatusAcross.slice();
-      wordLen = activeWord.xEnd - activeWord.xStart;
+      wordLen = activeWord.xEnd - activeWord.xStart + 1;
     } else {
       wordStatusArr = this.state.wordStatusDown.slice();
-      wordLen = activeWord.yEnd - activeWord.yStart;
+      wordLen = activeWord.yEnd - activeWord.yStart + 1;
     }
     let wordStatusObj = wordStatusArr[this.state.activeWordIndex];
     if (!wordStatusObj) {
@@ -123,7 +121,9 @@ export default class App extends React.Component {
           updateWord={this.updateWord}/>
         <Clues 
           words={this.crossword.words}
-          activeWord={this.activeWord}
+          wordStatusAcross={this.state.wordStatusAcross}
+          wordStatusDown={this.state.wordStatusDown}
+          activeWordIndex={this.activeWordIndex}
           across={this.across} />
       </div>
     );
@@ -141,33 +141,41 @@ class Clues extends React.Component {
         <div className="wordSet">
           <h3>Across</h3>
           {this.props.words.across.map((word, index) => {
-            if (word == this.props.activeWord) {
-              return (
-                <p className="wordList-active"><b>{word.number}:</b> {word.clue}</p>
-              );
-            } else {
-              return (
-                <p><b>{word.number}:</b> {word.clue}</p>
-              );
-            }
+            const wordComplete = !!this.props.wordStatusAcross[index] && 
+                                 this.props.wordStatusAcross[index].correct;
+            return (
+              <Word word={word}
+                    active={this.props.across && index == this.props.activeWordIndex}
+                    complete={wordComplete} />
+            )
           })}
         </div>
         <div className="wordSet">
           <h3>Down</h3>
           {this.props.words.down.map((word, index) => {
-            if (word == this.props.activeWord) {
-              return (
-                <p className="wordList-active"><b>{word.number}:</b> {word.clue}</p>
-              );
-            } else {
-              return (
-                <p><b>{word.number}:</b> {word.clue}</p>
-              );
-            }
+            const wordComplete = !!this.props.wordStatusDown[this.props.activeWordIndex] && 
+                                 this.props.wordStatusDown[this.props.activeWordIndex].correct;
+            return (
+              <Word word={word}
+                    active={!this.props.across && index == this.props.activeWordIndex}
+                    complete={wordComplete} />
+            )
           })}
         </div>
       </div>
     );
+  }
+}
+
+class Word extends React.PureComponent {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    let activeClass = this.props.active ? 'active' : '';
+    let completeClass = this.props.complete ? 'complete' : '';
+    let classList = `word ${activeClass} ${completeClass}`;
+    return <p className={classList}><b>{this.props.word.number}:</b> {this.props.word.clue}</p>;
   }
 }
 

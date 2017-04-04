@@ -64,6 +64,14 @@ body {
   display: flex;
 }
 
-.wordList-active {
-  background: seagreen;
+.word {
+  font-family: sans-serif;
+
+  &.active {
+    background: seagreen;
+  }
+
+  &.complete {
+    color: #eee;
+  }
 }
