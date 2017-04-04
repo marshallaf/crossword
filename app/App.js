@@ -9,7 +9,7 @@ export default class App extends React.Component {
   constructor() {
     super();
 
-    let crossword = {
+    this.crossword = {
       board: [],
       words: {
         across: [],
@@ -23,15 +23,18 @@ export default class App extends React.Component {
     };
 
     this.state = {
-      activeWord: null,
-      crossword: crossword,
-    };
+      wordStatusAcross: [],
+      wordStatusDown: [],
+      activeWordIndex: 0,
+      numCorrect: 0,
+    }
 
     this.across = true;
 
     this.setup = this.setup.bind(this);
     this.setActiveWord = this.setActiveWord.bind(this);
     this.changeDirection = this.changeDirection.bind(this);
+    this.updateWord = this.updateWord.bind(this);
   }
 
   componentDidMount() {
@@ -52,18 +55,20 @@ export default class App extends React.Component {
     };
 
     this.across = true;
+    this.crossword = newCrossword;
 
-    this.setState({
-      crossword: newCrossword,
-      activeWord: newCrossword.words.across[0],
-    });
+    this.state = {
+      wordStatusAcross: [],
+      wordStatusDown: [],
+      activeWordIndex: 0,
+      numCorrect: 0,
+    }
+    this.forceUpdate();
   }
 
   setActiveWord(x, y) {
-    let direction = this.across ? 'across' : 'down';
-    let wordNo = this.state.crossword.board[y][x][direction];
-    let word = this.state.crossword.words[direction][wordNo];
-    this.setState({ activeWord: word });
+    const direction = this.across ? 'across' : 'down';
+    this.setState({activeWordIndex: this.crossword.board[y][x][direction]});
   }
 
   changeDirection(x, y) {
@@ -71,19 +76,45 @@ export default class App extends React.Component {
     this.setActiveWord(x, y);
   }
 
+  //TODO: you have to change the properties of the word object in the crossword, since
+  // activeWord is not permanent. Better to just change activeWord to reflect the current word index.
+  updateWord(letterStatus) {
+    // update total board correctness
+    this.numCorrect += letterStatus;
+
+    // update word correctness
+    const direction = this.across ? 'across' : 'down';
+    const activeWord = this.words[direction][this.activeWord];
+    if (!activeWord.hasOwnProperty('numCorrect')) {
+      activeWord.numCorrect = letterStatus;
+    } else {
+      activeWord.numCorrect += letterStatus;
+    }
+
+    if (!activeWord.hasOwnProperty('wordLen')) {
+      if (this.across) {
+        activeWord.wordLen = activeWord.xEnd - activeWord.xStart;
+      } else {
+        activeWord.wordLen = activeWord.yEnd - activeWord.yStart;
+      }
+    }
+  }
+
   render() {
     return (
       <div className="container">
         <Board 
-          crossword={this.state.crossword}
+          crossword={this.crossword}
           dims={this.dims}
-          activeWord={this.state.activeWord}
+          activeWordIndex={this.state.activeWordIndex}
           setActiveWord={this.setActiveWord}
           across={this.across}
-          changeDirection={this.changeDirection}/>
+          changeDirection={this.changeDirection}
+          updateWord={this.updateWord}/>
         <Clues 
-          words={this.state.crossword.words}
-          activeWord={this.state.activeWord} />
+          words={this.crossword.words}
+          activeWord={this.activeWord}
+          across={this.across} />
       </div>
     );
   }
@@ -99,7 +130,7 @@ class Clues extends React.Component {
       <div className="wordsList">
         <div className="wordSet">
           <h3>Across</h3>
-          {this.props.words.across.map(word => {
+          {this.props.words.across.map((word, index) => {
             if (word == this.props.activeWord) {
               return (
                 <p className="wordList-active"><b>{word.number}:</b> {word.clue}</p>
@@ -113,7 +144,7 @@ class Clues extends React.Component {
         </div>
         <div className="wordSet">
           <h3>Down</h3>
-          {this.props.words.down.map(word => {
+          {this.props.words.down.map((word, index) => {
             if (word == this.props.activeWord) {
               return (
                 <p className="wordList-active"><b>{word.number}:</b> {word.clue}</p>
@@ -147,6 +178,7 @@ class Board extends React.Component {
     this.moveWordForward = this.moveWordForward.bind(this);
     this.moveWordBackward = this.moveWordBackward.bind(this);
     this.handleArrows = this.handleArrows.bind(this);
+    this.getActiveWord = this.getActiveWord.bind(this);
   }
 
 
@@ -267,6 +299,12 @@ class Board extends React.Component {
     return y * this.props.dims.width + x;
   }
 
+  getActiveWord() {
+    if (this.props.across) {
+      return this.props.crossword.words.across[this.props.activeWordIndex];
+    } else return this.props.crossword.words.down[this.props.activeWordIndex];
+  }
+
   render() {
     return (
       <div className='board'>
@@ -285,7 +323,7 @@ class Board extends React.Component {
                       index={index}
                       x={x}
                       y={y}
-                      activeWord={this.props.activeWord}
+                      activeWord={this.getActiveWord()}
                       activeX={this.state.activeX}
                       activeY={this.state.activeY}
                       setActive={this.setActive}
@@ -295,6 +333,7 @@ class Board extends React.Component {
                       moveWordBackward={this.moveWordBackward}
                       changeDirection={this.props.changeDirection}
                       handleArrows={this.handleArrows}
+                      updateWord={this.props.updateWord}
                       ref={cellObj => this.refDict[index] = cellObj}/>
                   )
                 }
@@ -332,6 +371,11 @@ class Cell extends React.Component {
     if (letter == this.solution) {
       correct = true;
     }
+    if (this.state.correct && !correct) {
+      this.props.updateWord(-1);
+    } else if (!this.state.correct && correct) {
+      this.props.updateWord(1);
+    }
     this.setState({
       input: letter,
       correct: correct,
@@ -367,6 +411,7 @@ class Cell extends React.Component {
       else this.writeLetter('');
     } else if(e.keyCode == 32) {
       // spacebar pressed
+      e.preventDefault();
       this.props.changeDirection(this.props.x, this.props.y);
     } else if (e.keyCode >= 37 && e.keyCode <= 40) {
       // arrow keys pressed
