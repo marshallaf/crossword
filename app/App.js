@@ -80,23 +80,33 @@ export default class App extends React.Component {
   // activeWord is not permanent. Better to just change activeWord to reflect the current word index.
   updateWord(letterStatus) {
     // update total board correctness
-    this.numCorrect += letterStatus;
+    const numCorrect = this.state.numCorrect + letterStatus;
 
     // update word correctness
+    let wordLen, wordStatusArr;
     const direction = this.across ? 'across' : 'down';
-    const activeWord = this.words[direction][this.activeWord];
-    if (!activeWord.hasOwnProperty('numCorrect')) {
-      activeWord.numCorrect = letterStatus;
+    const activeWord = this.crossword.words[direction][this.state.activeWordIndex];
+    if (this.across) {
+      wordStatusArr = this.state.wordStatusAcross.slice();
+      wordLen = activeWord.xEnd - activeWord.xStart;
     } else {
-      activeWord.numCorrect += letterStatus;
+      wordStatusArr = this.state.wordStatusDown.slice();
+      wordLen = activeWord.yEnd - activeWord.yStart;
     }
+    let wordStatusObj = wordStatusArr[this.state.activeWordIndex];
+    if (!wordStatusObj) {
+      wordStatusObj = { numCorrect: 0, correct: false };
+    }
+    wordStatusObj.numCorrect += letterStatus;
+    if (wordStatusObj.numCorrect == wordLen) {
+      wordStatusObj.correct = true;
+    }
+    wordStatusArr[this.state.activeWordIndex] = wordStatusObj;
 
-    if (!activeWord.hasOwnProperty('wordLen')) {
-      if (this.across) {
-        activeWord.wordLen = activeWord.xEnd - activeWord.xStart;
-      } else {
-        activeWord.wordLen = activeWord.yEnd - activeWord.yStart;
-      }
+    if (this.across) {
+      this.setState({wordStatusAcross: wordStatusArr, numCorrect: numCorrect});
+    } else {
+      this.setState({wordStatusDown: wordStatusArr, numCorrect: numCorrect});
     }
   }
 
