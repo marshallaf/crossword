@@ -19,6 +19,7 @@ body {
   justify-content: center;
   display: flex;
   align-items: center;
+  cursor: default;
 
   &.incorrect {
     color: red;
@@ -30,15 +31,6 @@ body {
 
   &.active {
     background: #ffcd19;
-  }
-
-  input {
-    position: absolute;
-    color: transparent;
-    height: 100%;
-    width: 100%;
-    opacity: 0;
-    cursor: default;
   }
 }
 
