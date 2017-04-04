@@ -123,7 +123,7 @@ export default class App extends React.Component {
           words={this.crossword.words}
           wordStatusAcross={this.state.wordStatusAcross}
           wordStatusDown={this.state.wordStatusDown}
-          activeWordIndex={this.activeWordIndex}
+          activeWordIndex={this.state.activeWordIndex}
           across={this.across} />
       </div>
     );
@@ -153,8 +153,8 @@ class Clues extends React.Component {
         <div className="wordSet">
           <h3>Down</h3>
           {this.props.words.down.map((word, index) => {
-            const wordComplete = !!this.props.wordStatusDown[this.props.activeWordIndex] && 
-                                 this.props.wordStatusDown[this.props.activeWordIndex].correct;
+            const wordComplete = !!this.props.wordStatusDown[index] && 
+                                 this.props.wordStatusDown[index].correct;
             return (
               <Word word={word}
                     active={!this.props.across && index == this.props.activeWordIndex}
@@ -413,10 +413,9 @@ class Cell extends React.Component {
   }
 
   handleKeyPress(e) {
-    console.log(e.keyCode);
+    e.preventDefault();
     if (e.keyCode == 9) {
       // tab pressed
-      e.preventDefault();
       if (!e.shiftKey) {
         this.props.moveWordForward(this.props.x, this.props.y);
       } else {
@@ -429,7 +428,6 @@ class Cell extends React.Component {
       else this.writeLetter('');
     } else if(e.keyCode == 32) {
       // spacebar pressed
-      e.preventDefault();
       this.props.changeDirection(this.props.x, this.props.y);
     } else if (e.keyCode >= 37 && e.keyCode <= 40) {
       // arrow keys pressed
@@ -437,7 +435,7 @@ class Cell extends React.Component {
     } else if (e.keyCode >= 65 && e.keyCode <= 90) {
       this.writeLetter(e.key);
       // only move cell forward if not at the end of a word
-      if (!(this.props.x == this.props.activeXend && this.props.y == this.props.activeYend))
+      if (!(this.props.x == this.props.activeWord.xEnd && this.props.y == this.props.activeWord.yEnd))
         this.props.moveForward(this.props.x, this.props.y);
     }
   }
