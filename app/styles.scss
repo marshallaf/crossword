@@ -77,3 +77,8 @@ body {
     color: #eee;
   }
 }
+
+.clue-list {
+  max-height: 90vh;
+  overflow: auto;
+}

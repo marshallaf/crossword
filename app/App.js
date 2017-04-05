@@ -205,15 +205,31 @@ class ClueList extends React.Component {
   }
 }
 
-class Word extends React.PureComponent {
+class Word extends React.Component {
   constructor(props) {
     super(props);
+    this.wordP = null;
   }
+
+  scrollTo() {
+    if (this.wordP && this.props.active) {
+      const scrollHeight = this.wordP.offsetTop;
+      const list = this.wordP.parentElement;
+      list.scrollTop = scrollHeight - list.offsetTop;
+    }
+  }
+
   render() {
+    this.scrollTo();
     let activeClass = this.props.active ? 'active' : '';
     let completeClass = this.props.complete ? 'complete' : '';
     let classList = `word ${activeClass} ${completeClass}`;
-    return <p className={classList}><b>{this.props.word.number}:</b> {this.props.word.clue}</p>;
+    return (
+      <p className={classList}
+        ref={wordP => this.wordP = wordP}>
+        <b>{this.props.word.number}:</b> {this.props.word.clue}
+      </p>
+    );
   }
 }
 
