@@ -38,13 +38,18 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    fetch('./testcrossword.xml')
-      .then(res => res.text())
-      .then(astext => convertCrossword(astext))
-      .then(converted => {
-        this.setup(converted);
-      },
-      error => {console.error('problem reading crossword', error)});
+    const debug = false;
+    if (debug) {
+      fetch('./testcrossword.xml')
+        .then(res => res.text())
+        .then(astext => convertCrossword(astext))
+        .then(converted => {
+          this.setup(converted);
+        },
+        error => {console.error('problem reading crossword', error)});
+    } else {
+      this.setup(crossword);
+    }
   }
 
 
@@ -56,11 +61,17 @@ export default class App extends React.Component {
 
     this.across = true;
     this.crossword = newCrossword;
+    this.numCells = newCrossword.board.reduce((acc, row) => {
+      return acc + row.reduce((acc, cell) => {
+        if (cell.letter) return acc + 1;
+        else return acc;
+      }, 0);
+    }, 0);
 
     this.state = {
       wordStatusAcross: [],
       wordStatusDown: [],
-      activeWordIndex: 0,
+      activeWordIndex: {across: 0, down: 0},
       numCorrect: 0,
     }
     this.forceUpdate();
@@ -68,7 +79,9 @@ export default class App extends React.Component {
 
   setActiveWord(x, y) {
     const direction = this.across ? 'across' : 'down';
-    this.setState({activeWordIndex: this.crossword.board[y][x][direction]});
+    const newActive = {across: this.crossword.board[y][x].across,
+                       down: this.crossword.board[y][x].down};
+    this.setState({activeWordIndex: newActive});
   }
 
   changeDirection(x, y) {
@@ -79,33 +92,44 @@ export default class App extends React.Component {
   updateWord(letterStatus) {
     // update total board correctness
     const numCorrect = this.state.numCorrect + letterStatus;
+    if (numCorrect == this.numCells) alert('You win');
 
     // update word correctness
-    let wordLen, wordStatusArr;
-    const direction = this.across ? 'across' : 'down';
-    const activeWord = this.crossword.words[direction][this.state.activeWordIndex];
-    if (this.across) {
-      wordStatusArr = this.state.wordStatusAcross.slice();
-      wordLen = activeWord.xEnd - activeWord.xStart + 1;
-    } else {
-      wordStatusArr = this.state.wordStatusDown.slice();
-      wordLen = activeWord.yEnd - activeWord.yStart + 1;
-    }
-    let wordStatusObj = wordStatusArr[this.state.activeWordIndex];
-    if (!wordStatusObj) {
-      wordStatusObj = { numCorrect: 0, correct: false };
-    }
-    wordStatusObj.numCorrect += letterStatus;
-    if (wordStatusObj.numCorrect == wordLen) {
-      wordStatusObj.correct = true;
-    }
-    wordStatusArr[this.state.activeWordIndex] = wordStatusObj;
+    // across correctness
+    let activeWord = this.crossword.words.across[this.state.activeWordIndex.across];
+    let wordLen = activeWord.xEnd - activeWord.xStart + 1;
+    const wordStatusAcross = this.updateWordArray(this.state.wordStatusAcross, 
+                                                  this.state.activeWordIndex.across,
+                                                  letterStatus,
+                                                  wordLen);
 
-    if (this.across) {
-      this.setState({wordStatusAcross: wordStatusArr, numCorrect: numCorrect});
-    } else {
-      this.setState({wordStatusDown: wordStatusArr, numCorrect: numCorrect});
+
+    // TODO: in order for this to work, you need to keep the index of both
+    //       the across word index and the down word index. Keep it as an object
+    //       in state.
+    activeWord = this.crossword.words.down[this.state.activeWordIndex.down];
+    wordLen = activeWord.yEnd - activeWord.yStart + 1;
+    const wordStatusDown = this.updateWordArray(this.state.wordStatusDown, 
+                                                  this.state.activeWordIndex.down,
+                                                  letterStatus,
+                                                  wordLen);
+
+    this.setState({
+      wordStatusAcross: wordStatusAcross, 
+      wordStatusDown: wordStatusDown, 
+      numCorrect: numCorrect,
+    });
+  }
+
+  updateWordArray(array, index, status, length) {
+    const newArray = array.slice();
+    const wordObj = newArray[index] || { numCorrect: 0, correct: false };
+    wordObj.numCorrect += status;
+    if (wordObj.numCorrect == length) {
+      wordObj.correct = true;
     }
+    newArray[index] = wordObj;
+    return newArray;
   }
 
   render() {
@@ -145,7 +169,7 @@ class Clues extends React.Component {
                                  this.props.wordStatusAcross[index].correct;
             return (
               <Word word={word}
-                    active={this.props.across && index == this.props.activeWordIndex}
+                    active={this.props.across && index == this.props.activeWordIndex.across}
                     complete={wordComplete} />
             )
           })}
@@ -157,7 +181,7 @@ class Clues extends React.Component {
                                  this.props.wordStatusDown[index].correct;
             return (
               <Word word={word}
-                    active={!this.props.across && index == this.props.activeWordIndex}
+                    active={!this.props.across && index == this.props.activeWordIndex.down}
                     complete={wordComplete} />
             )
           })}
@@ -319,8 +343,8 @@ class Board extends React.Component {
 
   getActiveWord() {
     if (this.props.across) {
-      return this.props.crossword.words.across[this.props.activeWordIndex];
-    } else return this.props.crossword.words.down[this.props.activeWordIndex];
+      return this.props.crossword.words.across[this.props.activeWordIndex.across];
+    } else return this.props.crossword.words.down[this.props.activeWordIndex.down];
   }
 
   render() {
@@ -338,6 +362,7 @@ class Board extends React.Component {
                     <Cell 
                       key={index} 
                       solution={square.letter}
+                      number={square.number || -1}
                       index={index}
                       x={x}
                       y={y}
@@ -454,6 +479,7 @@ class Cell extends React.Component {
         onClick={this.toggleActive}
         onKeyDown={this.handleKeyPress}
         ref={square => this.square = square}>
+        {this.props.number != -1 && <div className='number'>{this.props.number}</div>}
         {this.state.input}        
       </div>
     );
