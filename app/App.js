@@ -161,8 +161,8 @@ class CluesContainer extends React.Component {
 
   render() {
     return (
-      <div className="wordsList">
-        <div className="wordSet">
+      <div className="clue-container-all">
+        <div className="clue-container-one">
           <h3>Across</h3>
           <ClueList 
             words={this.props.words.across}
@@ -170,7 +170,7 @@ class CluesContainer extends React.Component {
             across={this.props.across}
             activeWordIndex={this.props.activeWordIndex.across}/>
         </div>
-        <div className="wordSet">
+        <div className="clue-container-one">
           <h3>Down</h3>
           <ClueList 
             words={this.props.words.down}
@@ -225,10 +225,10 @@ class Word extends React.Component {
     let completeClass = this.props.complete ? 'complete' : '';
     let classList = `word ${activeClass} ${completeClass}`;
     return (
-      <p className={classList}
+      <div className={classList}
         ref={wordP => this.wordP = wordP}>
         <b>{this.props.word.number}:</b> {this.props.word.clue}
-      </p>
+      </div>
     );
   }
 }

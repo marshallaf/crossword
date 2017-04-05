@@ -1,5 +1,5 @@
 body {
-  background-color: green;
+  background: peachpuff;
 }
 
 .container {
@@ -61,24 +61,35 @@ body {
   position: relative;
 }
 
-.wordsList {
-  background: salmon;
+.clue-container-all {
   display: flex;
+  background: white;
+  border-radius: 4px;
+  margin-left: 10px;
+}
+
+.clue-container-one h3 {
+  font-family: sans-serif;
+  text-align: center;
 }
 
 .word {
   font-family: sans-serif;
+  padding: 4px;
+  border-radius: 4px;
 
   &.active {
-    background: seagreen;
+    background: #99c0ff;
   }
 
   &.complete {
-    color: #eee;
+    color: #ccc;
   }
 }
 
 .clue-list {
   max-height: 90vh;
+  max-width: 300px;
   overflow: auto;
+  padding: 0 15px 0 15px;
 }
