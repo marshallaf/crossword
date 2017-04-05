@@ -25,7 +25,7 @@ export default class App extends React.Component {
     this.state = {
       wordStatusAcross: [],
       wordStatusDown: [],
-      activeWordIndex: 0,
+      activeWordIndex: {across: 0, down: 0},
       numCorrect: 0,
     }
 
@@ -38,7 +38,7 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    const debug = false;
+    const debug = true;
     if (debug) {
       fetch('./testcrossword.xml')
         .then(res => res.text())
@@ -143,7 +143,7 @@ export default class App extends React.Component {
           across={this.across}
           changeDirection={this.changeDirection}
           updateWord={this.updateWord}/>
-        <Clues 
+        <CluesContainer 
           words={this.crossword.words}
           wordStatusAcross={this.state.wordStatusAcross}
           wordStatusDown={this.state.wordStatusDown}
@@ -154,7 +154,7 @@ export default class App extends React.Component {
   }
 }
 
-class Clues extends React.Component {
+class CluesContainer extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -164,30 +164,44 @@ class Clues extends React.Component {
       <div className="wordsList">
         <div className="wordSet">
           <h3>Across</h3>
-          {this.props.words.across.map((word, index) => {
-            const wordComplete = !!this.props.wordStatusAcross[index] && 
-                                 this.props.wordStatusAcross[index].correct;
-            return (
-              <Word word={word}
-                    active={this.props.across && index == this.props.activeWordIndex.across}
-                    complete={wordComplete} />
-            )
-          })}
+          <ClueList 
+            words={this.props.words.across}
+            wordStatus={this.props.wordStatusAcross}
+            across={this.props.across}
+            activeWordIndex={this.props.activeWordIndex.across}/>
         </div>
         <div className="wordSet">
           <h3>Down</h3>
-          {this.props.words.down.map((word, index) => {
-            const wordComplete = !!this.props.wordStatusDown[index] && 
-                                 this.props.wordStatusDown[index].correct;
-            return (
-              <Word word={word}
-                    active={!this.props.across && index == this.props.activeWordIndex.down}
-                    complete={wordComplete} />
-            )
-          })}
+          <ClueList 
+            words={this.props.words.down}
+            wordStatus={this.props.wordStatusDown}
+            across={!this.props.across}
+            activeWordIndex={this.props.activeWordIndex.down}/>
         </div>
       </div>
     );
+  }
+}
+
+class ClueList extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return(
+      <div className="clue-list">
+        {this.props.words.map((word, index) => {
+          const wordComplete = !!this.props.wordStatus[index] && 
+                               this.props.wordStatus[index].correct;
+          return (
+            <Word word={word}
+                  active={this.props.across && index == this.props.activeWordIndex}
+                  complete={wordComplete} />
+          )
+        })}
+      </div>
+    )
   }
 }
 

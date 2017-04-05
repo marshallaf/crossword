@@ -55,8 +55,18 @@ export function convertCrossword(crosswordXml) {
 
       board.forEach((row, y) => {
         row.forEach((cell, x) => {
-          cell.across = words.across.findIndex(word => (y == word.yStart && x >= word.xStart && x <= word.xEnd));
-          cell.down = words.down.findIndex(word => (x == word.xStart && y >= word.yStart && y <= word.yEnd));
+          const indexAcross = words.across.findIndex(word => (y == word.yStart && x >= word.xStart && x <= word.xEnd));
+          const indexDown = words.down.findIndex(word => (x == word.xStart && y >= word.yStart && y <= word.yEnd));
+          if (indexAcross != -1) {
+            cell.across = indexAcross;
+            cell.down = indexDown;
+            if (words.across[indexAcross].xStart == x) {
+              cell.number = words.across[indexAcross].number;
+            }
+            if (!cell.number && words.down[indexDown].yStart == y) {
+              cell.number = words.down[indexDown].number;
+            }
+          }
         });
       });
 

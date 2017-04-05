@@ -32,6 +32,16 @@ body {
   &.active {
     background: #ffcd19;
   }
+
+  .number {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 2px;
+    font-size: .4em;
+    font-weight: normal;
+    color: black;
+  }
 }
 
 .board {
