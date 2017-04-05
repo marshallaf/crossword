@@ -11,16 +11,19 @@ export const crossword = {
         letter: 'F',
         across: 0,
         down: 0,
+        number: 1,
       },
       {
         letter: 'B',
         across: 0,
         down: 1,
+        number: 2,
       },
       {
         letter: 'I',
         across: 0,
         down: 2,
+        number: 3,
       }
     ],
     [
@@ -28,11 +31,13 @@ export const crossword = {
         letter: 'S',
         across: 1,
         down: 3,
+        number: 4,
       },
       {
         letter: 'H',
         across: 1,
         down: 4,
+        number: 5,
       },
       {
         letter: 'O',
@@ -55,6 +60,7 @@ export const crossword = {
         letter: 'C',
         across: 2,
         down: 3,
+        number: 6,
       },
       {
         letter: 'O',
@@ -82,6 +88,7 @@ export const crossword = {
         letter: 'A',
         across: 3,
         down: 3,
+        number: 7,
       },
       {
         letter: 'L',
@@ -109,6 +116,7 @@ export const crossword = {
         letter: 'N',
         across: 4,
         down: 3,
+        number: 8,
       },
       {
         letter: 'A',
