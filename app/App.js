@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import axios from 'axios';
 import './styles.scss';
 import {convertCrossword} from './convertCrossword';
 import {crossword} from '../crosswords/testcrossword2';
