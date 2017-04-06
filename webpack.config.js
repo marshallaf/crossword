@@ -1,4 +1,5 @@
 const path = require('path');
+const htmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   devtool: 'source-map',
@@ -9,7 +10,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'build'),
-    publicPath: '/serve/',
+    //publicPath: '/serve/',
     filename: 'bundle.js',
   },
   module: {
@@ -21,4 +22,8 @@ module.exports = {
   devServer: {
     inline: true,
   },
+  plugins: [new htmlWebpackPlugin({
+    title: 'Crossword Explosion',
+    template: './app/index.ejs',
+  })],
 }
