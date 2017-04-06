@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server/server.js",
+    "start": "node ./server/server.js",
     "start-dev": "webpack-dev-server",
     "heroku-postbuild": "webpack -p --config ./webpack.config.js --progress"
   },
